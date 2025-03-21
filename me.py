@@ -4,7 +4,12 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 import time
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
-import os
+import time
+from datetime import datetime
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# Initialize logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Initialize logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -346,29 +351,56 @@ attack_running = False  # ✅ Ek time pe sirf ek attack allow karega
 # Define the maximum allowed duration for an attack (in seconds)
 MAX_ATTACK_DURATION = 150  # Example: 5 minutes (300 seconds)
 
+
+# Global variables for attack management
+attack_running = False  # Indicates if an attack is currently running
+attack_start_time = None  # Tracks when the attack started
+MAX_ATTACK_DURATION = 150  # Maximum attack duration in seconds
+
+# Helper functions for validation
+def is_valid_ip(ip):
+    """Check if the IP address is valid."""
+    parts = ip.split('.')
+    return len(parts) == 4 and all(part.isdigit() and 0 <= int(part) <= 255 for part in parts)
+
+def is_valid_port(port):
+    """Check if the port number is valid."""
+    return port.isdigit() and 0 <= int(port) <= 65535
+
+def is_valid_duration(duration):
+    """Check if the duration is valid."""
+    return duration.isdigit() and 0 < int(duration) <= MAX_ATTACK_DURATION
+
 @bot.message_handler(commands=['bgmi'])
 def bgmi_command(message):
-    global attack_running, user_photos, user_bans
+    global attack_running, attack_start_time
+
     user_id = message.from_user.id
     user_name = message.from_user.first_name or "Unknown"
-    required_channel = FEEDBACK_CHANNEL_ID  # Replace with your actual channel ID
 
+    # Check if an attack is already running
+    if attack_running:
+        bot.reply_to(
+            message,
+            "🚨 **𝗔𝗧𝗧𝗔𝗖𝗞 𝗔𝗟𝗥𝗘𝗔𝗗𝗬 𝗥𝗨𝗡𝗡𝗜𝗡𝗚!** 🚨\n\n"
+            "⚠️ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁 𝘂𝗻𝘁𝗶𝗹 𝘁𝗵𝗲 𝗰𝘂𝗿𝗿𝗲𝗻𝘁 𝗮𝘁𝘁𝗮𝗰𝗸 𝗶𝘀 𝗰𝗼𝗺𝗽𝗹𝗲𝘁𝗲𝗱."
+        )
+        return
+
+    # Check if the user is in the required channel
     try:
-        user_status = bot.get_chat_member(required_channel, user_id).status
+        user_status = bot.get_chat_member(FEEDBACK_CHANNEL_ID, user_id).status
         if user_status not in ["member", "administrator", "creator"]:
-            # 🔹 Inline Button for Joining Channel
+            # Inline button for joining the channel
             keyboard = InlineKeyboardMarkup()
             join_button = InlineKeyboardButton("➖ 𝗖𝗟𝗜𝗖𝗞 𝗛𝗘𝗥𝗘 𝗧𝗢 𝗝𝗢𝗜𝗡 ➖", url="https://t.me/RAJOWNER9090")
             keyboard.add(join_button)
 
+            # Try to fetch user profile photo
             try:
-                # ✅ Fetch user profile photo
                 photos = bot.get_user_profile_photos(user_id)
-
                 if photos.total_count > 0:
-                    photo_file_id = photos.photos[0][0].file_id  # ✅ User ki latest DP
-
-                    # ✅ Send message with DP + Button (FIXED)
+                    photo_file_id = photos.photos[0][0].file_id  # User's latest profile photo
                     bot.send_photo(
                         message.chat.id,
                         photo_file_id,
@@ -380,27 +412,24 @@ def bgmi_command(message):
                             " *‼️𝗔𝗳𝘁𝗲𝗿 𝗷𝗼𝗶𝗻𝗶𝗻𝗴, 𝘁𝗿𝘆 𝘁𝗵𝗲 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 /bgmi 𝗮𝗴𝗮𝗶𝗻‼️*"
                         ),
                         parse_mode="Markdown",
-                        reply_markup=keyboard  # ✅ Add Inline Button
+                        reply_markup=keyboard
                     )
                 else:
-                    raise Exception("User ke paas DP nahi hai.")  # **Agar DP nahi hai toh error throw karenge**
-
+                    raise Exception("User has no profile photo.")
             except Exception as e:
-                # ❌ Agar DP fetch nahi ho rahi, toh normal message bhejo (FIXED)
+                # If profile photo cannot be fetched, send a normal message
                 bot.send_message(
                     message.chat.id,
                     f"⚠️ **DP Error:** {e}\n\n"
                     " *‼️🇩 🇦 🇷 🇰 🇽 🇸 🇪 🇷 🇻 🇪 🇷 ™ 𝗔𝗖𝗖𝗘𝗦𝗦 𝗗𝗘𝗡𝗜𝗘𝗗‼️* \n\n"
                     "📢 *LET'S GO AND JOIN CHANNEL*\n\n"
                     f" [➖ 𝗖𝗟𝗜𝗖𝗞 𝗛𝗘𝗥𝗘 𝗧𝗢 𝗝𝗢𝗜𝗡 ➖](https://t.me/RAJOWNER9090)\n\n"
-                    " *‼️𝗔𝗳𝘁𝗲𝗿 𝗷𝗼𝗂𝗇𝗂𝗇𝗀, 𝘁𝗿𝘆 𝘁𝗵𝗲 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 /bgmi 𝗮𝗴𝗮𝗶𝗻‼️*",
+                    " *‼️𝗔𝗳𝘁𝗲𝗿 𝗷𝗼𝗶𝗻𝗶𝗻𝗴, 𝘁𝗿𝘆 𝘁𝗵𝗲 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 /bgmi 𝗮𝗴𝗮𝗶𝗻‼️*",
                     parse_mode="Markdown",
-                    disable_web_page_preview=True,  # ✅ Yeh sirf send_message() me hoga, send_photo() me nahi
-                    reply_markup=keyboard  
+                    disable_web_page_preview=True,
+                    reply_markup=keyboard
                 )
-
             return
-
     except Exception as e:
         bot.send_message(
             message.chat.id,
@@ -408,262 +437,48 @@ def bgmi_command(message):
         )
         return
 
-    # Ensure only one attack runs at a time
-    if attack_running:
-        bot.reply_to(message, "🚨🔥 『  �𝙏𝙏𝘼𝘾𝙆 �𝙃𝘼𝙇 𝙍𝙃𝘼 𝙃𝘼𝙄! 』🔥🚨\n\n⚠️ 𝗕𝗘𝗧𝗔 𝗦𝗔𝗕𝗥 𝗞𝗔𝗥! 😈💥\n\n🔄 ATTACK KHATAM HOTE HI TERA LAGA DE! 💥💣.")
-        return
-
     # Ensure the bot only works in the specified channel or group
     if str(message.chat.id) != CHANNEL_ID:
-        bot.send_message(message.chat.id, " ⚠️⚠️ 𝗧𝗵𝗶𝘀 𝗯𝗼𝘁 𝗶𝘀 𝗻𝗼𝘁 𝗮𝘂𝘁𝗵𝗼𝗿𝗶𝘇𝗲𝗱 𝘁𝗼 𝗯𝗲 𝘂𝘀𝗲𝗱 𝗵𝗲𝗿𝗲 ⚠️⚠️ \n\n[ 𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 : @RAJOWNER90 ( TUMHARE_PAPA ) | ]")
+        bot.send_message(
+            message.chat.id,
+            "⚠️⚠️ 𝗧𝗵𝗶𝘀 𝗯𝗼𝘁 𝗶𝘀 𝗻𝗼𝘁 𝗮𝘂𝘁𝗵𝗼𝗿𝗶𝘇𝗲𝗱 𝘁𝗼 𝗯𝗲 𝘂𝘀𝗲𝗱 𝗵𝗲𝗿𝗲 ⚠️⚠️\n\n"
+            "[ 𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 : @RAJOWNER90 ( TUMHARE_PAPA ) | ]"
+        )
         return
 
-    # Reset counts daily
-    reset_daily_counts()
-
-    # Check if the user is banned
-    if user_id in user_bans:
-        ban_expiry = user_bans[user_id]
-        if datetime.now() < ban_expiry:
-            remaining_ban_time = (ban_expiry - datetime.now()).total_seconds()
-            minutes, seconds = divmod(remaining_ban_time, 60)
-            bot.send_message(
-                message.chat.id,
-                f"⚠️⚠️ 𝙃𝙞 {message.from_user.first_name}, 𝙔𝙤𝙪 𝙖𝙧𝙚 𝙗𝙖𝙣𝙣𝙚𝙙 𝙛𝙤𝙧 𝙣𝙤𝙩 𝙥𝙧𝙤𝙫𝙞𝙙𝙞𝙣𝙜 𝙛𝙚𝙚𝙙𝙗𝙖𝙘𝙠. �𝙡𝙚𝙖𝙨𝙚 𝙬𝙖𝙞𝙩 {int(minutes)} 𝙢𝙞𝙣𝙪𝙩𝙚𝙨 𝙖𝙣𝙙 {int(seconds)} �𝙚𝙘𝙤𝙣𝙙𝙨 𝙗𝙚𝙛𝙤𝙧𝙚 𝙩𝙧𝙮𝙞𝙣𝙜 𝙖𝙜𝙖𝙞𝙣 !  ⚠️⚠️"
-            )
-            return
-        else:
-            del user_bans[user_id]  # Remove ban after expiry
-
-    # Split the command to get parameters
+    # Parse the command arguments
     try:
         args = message.text.split()[1:]  # Skip the command itself
-        logging.info(f"Received arguments: {args}")
-
         if len(args) != 3:
-            raise ValueError("🇩 🇦 🇷 🇰 🇽 🇸 🇪 🇷 🇻 🇪 🇷 ™ 𝗣𝗨𝗕𝗟𝗶𝗖 𝗕𝗢𝗧 𝗔𝗖𝗧𝗶𝗩𝗘 ✅ \n\n⚙ 𝙋𝙡𝙚𝙖𝙨𝙚 𝙪𝙨𝙚 𝙩𝙝𝙚 𝙛𝙤𝙧𝙢𝙖𝙩 \n /bgmi <𝘁𝗮𝗿𝗴𝗲𝘁_𝗶𝗽> <𝘁𝗮𝗿𝗴𝗲𝘁_𝗽𝗼𝗿𝘁> <𝗱𝘂𝗿𝗮𝘁𝗶𝗼𝗻>")
+            raise ValueError(
+                "🇩 🇦 🇷 🇰 🇽 🇸 🇪 🇷 🇻 🇪 🇷 ™ 𝗣𝗨𝗕𝗟𝗶𝗖 𝗕𝗢𝗧 𝗔𝗖𝗧𝗶𝗩𝗘 ✅ "
 
-        target_ip, target_port, user_duration = args
+                "⚙ 𝙋𝙡𝙚𝙖𝙨𝙚 𝙪𝙨𝙚 𝙩𝙝𝙚 𝙛𝙤𝙧𝙢𝙖𝙩 "
+                " /bgmi <𝘁𝗮𝗿𝗴𝗲𝘁_𝗶𝗽> <𝘁𝗮𝗿𝗴𝗲𝘁_𝗽𝗼𝗿𝘁> <𝗱𝘂𝗿𝗮𝘁𝗶𝗼𝗻>"
+            )
+
+        target_ip, target_port, duration = args
 
         # Validate inputs
         if not is_valid_ip(target_ip):
-            raise ValueError("Invalid IP address.")
+            raise ValueError("❌ **𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗜𝗣 𝗮𝗱𝗱𝗿𝗲𝘀𝘀.**")
         if not is_valid_port(target_port):
-            raise ValueError("Invalid port number.")
-        if not is_valid_duration(user_duration):
-            raise ValueError("Invalid duration. Must be a positive integer.")
+            raise ValueError("❌ **𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗽𝗼𝗿𝘁 𝗻𝘂𝗺𝗯𝗲𝗿.**")
+        if not is_valid_duration(duration):
+            raise ValueError("❌ **𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗱𝘂𝗿𝗮𝘁𝗶𝗼𝗻.**")
 
-        # Check if the user-provided duration exceeds the maximum allowed duration
-        if int(user_duration) > MAX_ATTACK_DURATION:
-            raise ValueError(f"⚠️ Maximum attack duration is {MAX_ATTACK_DURATION} seconds. Please provide a duration less than or equal to {MAX_ATTACK_DURATION} seconds.")
+        # Ensure duration does not exceed 150 seconds
+        duration = int(duration)
+        if duration > MAX_ATTACK_DURATION:
+            raise ValueError(f"⚠️ **𝗠𝗮𝘅𝗶𝗺𝘂𝗺 𝗱𝘂𝗿𝗮𝘁𝗶𝗼𝗻 𝗹𝗶𝗺𝗶𝘁 𝗶𝘀 𝟭𝟱𝟬 𝘀𝗲𝗰𝗼𝗻𝗱𝘀.**")
 
-        # Set attack_running to True to prevent multiple attacks
+        # Start the attack
         attack_running = True
+        attack_start_time = datetime.now()
 
-        # Notify that the attack will run for the default duration of 150 seconds, but display the input duration
-        default_duration = 125
-        
-        remaining_attacks = DAILY_ATTACK_LIMIT - user_attacks.get(user_id, 0)
-        
-        user_info = message.from_user
-        username = user_info.username if user_info.username else user_info.first_name
-        bot.send_message(
-            message.chat.id,
-            f"╔════════════════════════════════╗\n"
-            f"║ 🚀 **🇷 🇦 🇯 𝗔𝗧𝗧𝗔𝗖𝗞 𝗦𝗧𝗔𝗥𝗧𝗘𝗗!** 🚀 ║\n"
-            f"╚════════════════════════════════╝\n\n"
-            f"🔥 **𝗔𝗧𝗧𝗔𝗖𝗞𝗘𝗥:** 🎭 `{message.from_user.first_name}`\n"
-            f"🏆 **𝗨𝗦𝗘𝗥𝗡𝗔𝗠𝗘:** `@{username}`\n\n"
-            f"🎯 **𝗧𝗔𝗥𝗚𝗘𝗧 𝗗𝗘𝗧𝗔𝗜𝗟𝗦:**\n"
-            f"╔═════════════════════════════╗\n"
-            f"║ 🎯 **𝗧𝗔𝗥𝗚𝗘𝗧 𝗜𝗣:** `{target_ip} : {target_port}`\n"
-            f"║ ⏳ **𝗗𝗨𝗥𝗔𝗧𝗜𝗢𝗡:** `{default_duration} sec`\n"
-            f"║ 🔥 **𝗜𝗡𝗣𝗨𝗧 𝗗𝗨𝗥𝗔𝗧𝗜𝗢𝗡:** `{user_duration} sec`\n"
-            f"╚═════════════════════════════╝\n\n"
-            f"🎖 **𝗥𝗘𝗠𝗔𝗜𝗡𝗜𝗡𝗚 𝗔𝗧𝗧𝗔𝗖𝗞𝗦:** `{remaining_attacks} / 15`\n"
-            f"⚠️ **𝗣𝗟𝗘𝗔𝗦𝗘 𝗦𝗘𝗡𝗗 𝗙𝗘𝗘𝗗𝗕𝗔𝗖𝗞 𝗔𝗙𝗧𝗘𝗥 𝗚𝗔𝗠𝗘!** ⚠️\n"
-        )
-
-        # Log the attack started message
-        logging.info(f"Attack started by {user_name}: ./RAJ {target_ip} {target_port} {default_duration}")
-
-        # Run the attack command with the default duration and pass the user-provided duration for the finish message
-        asyncio.run(run_attack_command_async(target_ip, int(target_port), user_duration, message.chat.id, message.from_user.username if message.from_user.username else message.from_user.first_name))
-
-    except Exception as e:
-        bot.send_message(message.chat.id, str(e))
-        attack_running = False
-
-# --------------------------------------------------------------
-        
-
-        
-        
-        
-# --------------------[ TERMINAL SECTION ]----------------------
-
-import os
-import subprocess
-import threading
-import time
-from telebot import types
-
-# ✅ **List of Blocked Commands**
-BLOCKED_COMMANDS = ["nano", "sudo", "rm", "rm -rf", "screen"]
-
-# ✅ **Admin ID List (Yahan Apna Real Telegram ID Daal!)**
-ADMIN_IDS = [7479349647]  # ✅ **Integer format me rakhna, string mat bana!**
-
-# ✅ **Terminal Menu Command**
-@bot.message_handler(func=lambda message: message.text == "VPS")
-def VPS_menu(message):
-    """Show the VPS menu for admins."""
-    user_id = message.chat.id  # ✅ Don't convert to string!
-
-    if user_id in ADMIN_IDS:  # ✅ Use correct admin list
-        markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-        command_button = types.KeyboardButton("Command")
-        upload_button = types.KeyboardButton("Upload")
-        download_button = types.KeyboardButton("Download")
-        back_button = types.KeyboardButton("<< Back to Menu")
-        markup.add(command_button, upload_button, download_button, back_button)
-
-        bot.reply_to(message, "⚙️ RAJ 𝗧𝗘𝗥𝗠𝗜𝗡𝗔𝗟 𝗠𝗘𝗡𝗨", reply_markup=markup)
-    else:
-        bot.reply_to(message, "⛔️ **You are not an admin.**", parse_mode="Markdown")
-
-
-# ✅ **Command Execution in VPS**
-@bot.message_handler(func=lambda message: message.text == "Command")
-def command_to_VPS(message):
-    user_id = message.chat.id
-    if user_id in ADMIN_IDS:
-        bot.reply_to(message, "💻 **𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗖𝗼𝗺𝗺𝗮𝗻𝗱:**", parse_mode="Markdown")
-        bot.register_next_step_handler(message, execute_VPS_command)
-    else:
-        bot.reply_to(message, "⛔ **𝗬𝗼𝘂 𝗮𝗿𝗲 𝗻𝗼𝘁 𝗮𝗻 𝗮𝗱𝗺𝗶𝗻.**", parse_mode="Markdown")
-
-def execute_VPS_command(message):
-    try:
-        command = message.text.strip()
-        
-        # ✅ **Check for Blocked Commands**
-        if any(command.startswith(block) for block in BLOCKED_COMMANDS):
-            bot.reply_to(message, "❗ **𝗧𝗵𝗶𝘀 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 𝗶𝘀 𝗯𝗹𝗼𝗰𝗸𝗲𝗱!** 🚫", parse_mode="Markdown")
-            return
-        
-        # ✅ **Execute Command in VPS**
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        output = result.stdout if result.stdout else result.stderr
-
-        bot.reply_to(message, f"✅ **𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗘𝘅𝗲𝗰𝘂𝘁𝗲𝗱:**\n```{output}```", parse_mode="Markdown")
-    except Exception as e:
-        bot.reply_to(message, f"❗ **𝗘𝗿𝗿𝗼𝗿:** `{str(e)}`", parse_mode="Markdown")
-
-# ✅ **Upload System with Animation**
-@bot.message_handler(func=lambda message: message.text == "Upload")
-def upload_to_VPS(message):
-    user_id = message.chat.id
-    if user_id in ADMIN_IDS:
-        bot.reply_to(message, "📤 **𝗦𝗲𝗻𝗱 𝗔 𝗙𝗶𝗹𝗲 𝗧𝗼 𝗨𝗽𝗹𝗼𝗮𝗱:**", parse_mode="Markdown")
-        bot.register_next_step_handler(message, process_file_upload)
-    else:
-        bot.reply_to(message, "⛔ **𝗬𝗼𝘂 𝗮𝗿𝗲 𝗻𝗼𝘁 𝗮𝗻 𝗮𝗱𝗺𝗶𝗻.**", parse_mode="Markdown")
-
-def upload_animation(chat_id, message_id, stop_event):
-    dots = [".", "..", "..."]
-    i = 0
-    while not stop_event.is_set():  
-        try:
-            bot.edit_message_text(f"📤 **𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴{dots[i]}**", chat_id=chat_id, message_id=message_id, parse_mode="Markdown")
-            i = (i + 1) % len(dots)
-            time.sleep(0.3)
-        except:
-            pass
-
-def process_file_upload(message):
-    if message.document:
-        try:
-            upload_msg = bot.reply_to(message, "📤 **𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴**", parse_mode="Markdown")
-            stop_event = threading.Event()
-            animation_thread = threading.Thread(target=upload_animation, args=(message.chat.id, upload_msg.message_id, stop_event))
-            animation_thread.start()
-
-            file_info = bot.get_file(message.document.file_id)
-            downloaded_file = bot.download_file(file_info.file_path)
-
-            file_path = os.path.join(os.getcwd(), message.document.file_name)
-            with open(file_path, 'wb') as new_file:
-                new_file.write(downloaded_file)
-
-            stop_event.set()
-            animation_thread.join()
-
-            bot.edit_message_text(f"✅ **𝗙𝗶𝗹𝗲 𝗨𝗽𝗹𝗼𝗮𝗱𝗲𝗱:** `{file_path}`", chat_id=message.chat.id, message_id=upload_msg.message_id, parse_mode="Markdown")
-
-        except Exception as e:
-            stop_event.set()
-            bot.reply_to(message, f"❗ **𝗘𝗿𝗿𝗼𝗿 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗙𝗶𝗹𝗲:** `{str(e)}`", parse_mode="Markdown")
-
-# ✅ **File Download System with Animated Progress**
-@bot.message_handler(func=lambda message: message.text == "Download")
-def list_files(message):
-    user_id = message.chat.id
-    if user_id not in ADMIN_IDS:
-        bot.send_message(message.chat.id, "⛔ **𝗬𝗼𝘂 𝗮𝗿𝗲 𝗻𝗼𝘁 𝗮𝗻 𝗮𝗱𝗺𝗶𝗻.**", parse_mode="Markdown")
-        return
-
-    files = [f for f in os.listdir() if os.path.isfile(f) and not f.startswith(".")]
-
-    if not files:
-        bot.send_message(message.chat.id, "📁 **𝗡𝗼 𝗙𝗶𝗹𝗲𝘀 𝗜𝗻 𝗩𝗣𝗦.**", parse_mode="Markdown")
-        return
-
-    markup = types.InlineKeyboardMarkup()
-    for file in files:
-        markup.add(types.InlineKeyboardButton(file, callback_data=f"download_{file}"))
-    
-    markup.add(types.InlineKeyboardButton("⭕ Cancel", callback_data="cancel_download"))
-    bot.send_message(message.chat.id, "📂 **𝗦𝗲𝗹𝗲𝗰𝘁 𝗙𝗶𝗹𝗲 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱:**", reply_markup=markup, parse_mode="Markdown")
-
-@bot.callback_query_handler(func=lambda call: call.data.startswith("download_"))
-def send_file(call):
-    user_id = call.message.chat.id
-    if user_id not in ADMIN_IDS:
-        bot.answer_callback_query(call.id, "⛔ **𝗔𝗰𝗰𝗲𝘀𝘀 𝗗𝗲𝗻𝗶𝗲𝗱.**")
-        return
-
-    filename = call.data.replace("download_", "")
-    if not os.path.exists(filename):
-        bot.answer_callback_query(call.id, "❌ **𝗙𝗶𝗹𝗲 𝗡𝗼𝘁 𝗙𝗼𝘂𝗻𝗱.**")
-        return
-
-    with open(filename, "rb") as file:
-        bot.send_document(call.message.chat.id, file)
-
-    bot.answer_callback_query(call.id, "✅ **𝗙𝗶𝗹𝗲 𝗦𝗲𝗻𝘁!**")
-
-@bot.callback_query_handler(func=lambda call: call.data == "cancel_download")
-def cancel_download(call):
-    bot.edit_message_text("❗ **𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱 𝗖𝗮𝗻𝗰𝗲𝗹𝗹𝗲𝗱.**", call.message.chat.id, call.message.message_id, parse_mode="Markdown")
-
-@bot.message_handler(func=lambda message: message.text == "<< Back to Menu")
-def back_to_main_menu(message):
-    """Go back to the main menu."""
-    user_id = message.chat.id
-    if user_id in ADMIN_IDS:
-        markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-        markup.add("VPS")  # ✅ **Main Menu Buttons**
-        bot.reply_to(message, "🔙 **Back to Main Menu!**", reply_markup=markup, parse_mode="Markdown")
-    else:
-        bot.reply_to(message, "⛔ **You are not an admin.**", parse_mode="Markdown")
-
-
-
-# Start the bot
-if __name__ == "__main__":
-    logging.info("Bot is starting...")
-    try:
-        bot.polling(none_stop=True)
-    except Exception as e:
-        logging.error(f"An error occurred: {e}")
+        # Send attack confirmation message
+        bot.reply_to(
+            message,
+            f"🚀 **𝗔𝗧𝗧𝗔𝗖𝗞 𝗦𝗧𝗔𝗥𝗧𝗘𝗗!** 🚀\n\n"
+            f"🎯 **𝗧𝗮𝗿𝗴𝗲𝘁 𝗜𝗣:** `{target_ip}`\n"
+            f"🔌 **𝗣𝗼𝗿�
