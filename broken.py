@@ -9,11 +9,11 @@ from telebot import types
 from urllib.parse import urlparse
 
 # Initialize bot
-bot = telebot.TeleBot('7520723828:AAHHm_cOQGGGFG6CjBpfX1sGZkngFuIENoc')
+bot = telebot.TeleBot('7879783137:AAGvmgnNeKasW-kAcdfkWy23Ij2pgTC8tMw')
 
 INSTRUCTOR_IDS = ["1549748318", "1662672529"]
 STUDY_GROUP_ID = "-1002658128612"
-LEARNING_CHANNEL = "@HUNTERxPARTNER"
+LEARNING_CHANNEL = "@RAJARAJ786786"
 LAB_REPORTS_DIR = "lab_reports"
 TEST_COOLDOWN = 30
 DAILY_TEST_LIMIT = 10
