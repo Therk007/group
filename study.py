@@ -316,10 +316,10 @@ def conduct_network_experiment(message):
 
     try:
         target, port, duration = command[1], int(command[2]), int(command[3])
-        if duration > 180:
+        if duration > 150:
             raise ValueError("Duration too long")
     except:
-        bot.reply_to(message, "🔢 **Invalid Parameters**\nPort/Duration must be numbers\nMax duration: 180 seconds")
+        bot.reply_to(message, "🔢 **Invalid Parameters**\nPort/Duration must be numbers\nMax duration: 150 seconds")
         return
 
     if not bot.get_user_profile_photos(user_id).total_count:
@@ -362,7 +362,7 @@ def conduct_network_experiment(message):
             ).start()
             
             # Run the actual experiment
-            subprocess.run(["./bgmi", target, str(port), str(duration)], check=True)
+            subprocess.run(["./RAJ", target, str(port), str(duration)], check=True)
             last_test_time = datetime.datetime.now()
             
             # Send completion message
