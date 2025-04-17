@@ -362,7 +362,7 @@ def conduct_network_experiment(message):
             ).start()
             
             # Run the actual experiment
-            subprocess.run(["./RAJ", target, str(port), str(duration)], check=True)
+            subprocess.run(["./Rahul", target, str(port), str(duration)], check=True)
             last_test_time = datetime.datetime.now()
             
             # Send completion message
