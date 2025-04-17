@@ -9,7 +9,7 @@ from telebot import types
 from urllib.parse import urlparse
 
 # Initialize bot
-bot = telebot.TeleBot('7879783137:AAGvmgnNeKasW-kAcdfkWy23Ij2pgTC8tMw')
+bot = telebot.TeleBot('7879783137:AAEddUnqqkwleg2c3S4iXHAIyFtGCW1vRDI')
 
 INSTRUCTOR_IDS = ["1549748318", "1662672529"]
 STUDY_GROUP_ID = "-1002654300042"
