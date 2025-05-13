@@ -316,10 +316,10 @@ def conduct_network_experiment(message):
 
     try:
         target, port, duration = command[1], int(command[2]), int(command[3])
-        if duration > 149:
+        if duration > 180:
             raise ValueError("Duration too long")
     except:
-        bot.reply_to(message, "🔢 **Invalid Parameters**\nPort/Duration must be numbers\nMax duration: 149 seconds")
+        bot.reply_to(message, "🔢 **Invalid Parameters**\nPort/Duration must be numbers\nMax duration: 180 seconds")
         return
 
     if not bot.get_user_profile_photos(user_id).total_count:
